@@ -24,7 +24,7 @@ resource "google_compute_instance" "vm_instance" {
   metadata = {
     ssh-keys = "${var.ssh_user}:${file(var.ssh_public_key_path)}"
   }
-  tags = ["ssh-access", "n8n-access"]
+  tags = ["ssh-access", "n8n-access", "qdrant-access"]
 }
 
 # Firewall rules remain unchanged
@@ -52,4 +52,17 @@ resource "google_compute_firewall" "n8n_firewall_rule" {
   }
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["n8n-access"]
+}
+
+resource "google_compute_firewall" "qdrant_firewall_rule" {
+  project     = var.project_id
+  name        = "allow-qdrant-from-internet"
+  network     = "default"
+  description = "Allows qdrant access from anywhere (0.0.0.0/0)"
+  allow {
+    protocol = "tcp"
+    ports    = ["6333"]
+  }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["qdrant-access"]
 }
